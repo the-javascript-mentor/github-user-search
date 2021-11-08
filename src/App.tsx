@@ -21,11 +21,14 @@ interface Suggestion {
 const App = () => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[] | []>([]);
+  const [numberOfPendingRequests, setNumberOfPendingRequests] = useState(0);
   const debouncedQuery = useDebounce(query, 500);
 
   useEffect(() => {
     if (debouncedQuery !== "") {
+      setNumberOfPendingRequests((previousValue) => previousValue + 1);
       getUsers(debouncedQuery).then((data) => {
+        setNumberOfPendingRequests((previousValue) => previousValue - 1);
         // TODO: Fix race condition issue
         setSuggestions(
           data.items.map((item: GitHubUser) => ({
@@ -51,7 +54,7 @@ const App = () => {
           setQuery(event.target.value);
         }}
       />
-      {suggestions.length > 0 && (
+      {suggestions.length > 0 && numberOfPendingRequests === 0 && (
         <ul>
           {suggestions.map((suggestion) => (
             <li key={suggestion.id}>
@@ -63,8 +66,13 @@ const App = () => {
           ))}
         </ul>
       )}
-      {debouncedQuery !== "" && suggestions.length === 0 && (
-        <div className="noResultsMessage">No results</div>
+      {debouncedQuery !== "" &&
+        suggestions.length === 0 &&
+        numberOfPendingRequests === 0 && (
+          <div className="noResultsMessage">No results</div>
+        )}
+      {numberOfPendingRequests > 0 && (
+        <div className="loadingMessage">Loading...</div>
       )}
     </div>
   );
