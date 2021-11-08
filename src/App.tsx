@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import useDebounce from "./useDebounce";
 import { getUsers } from "./api";
 
@@ -22,22 +22,28 @@ const App = () => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[] | []>([]);
   const [numberOfPendingRequests, setNumberOfPendingRequests] = useState(0);
+  const lastRequestWasFiredAt = useRef<number | null>(null);
   const debouncedQuery = useDebounce(query, 500);
 
   useEffect(() => {
     if (debouncedQuery !== "") {
       setNumberOfPendingRequests((previousValue) => previousValue + 1);
+
+      const searchFiredAt = Date.now();
+      lastRequestWasFiredAt.current = searchFiredAt;
+
       getUsers(debouncedQuery).then((data) => {
         setNumberOfPendingRequests((previousValue) => previousValue - 1);
-        // TODO: Fix race condition issue
-        setSuggestions(
-          data.items.map((item: GitHubUser) => ({
-            avatar: item.avatar_url,
-            id: item.id,
-            userName: item.login,
-            link: item.html_url,
-          }))
-        );
+        if (lastRequestWasFiredAt.current === searchFiredAt) {
+          setSuggestions(
+            data.items.map((item: GitHubUser) => ({
+              avatar: item.avatar_url,
+              id: item.id,
+              userName: item.login,
+              link: item.html_url,
+            }))
+          );
+        }
       });
     } else {
       setSuggestions([]);
