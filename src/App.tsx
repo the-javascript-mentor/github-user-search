@@ -1,54 +1,11 @@
-import { useEffect, useState, useRef } from "react";
-import useDebounce from "./useDebounce";
-import { getUsers } from "./api";
+import { useState } from "react";
+import useGitHubUserSearch from "./hooks";
 
 import "./App.css";
 
-interface GitHubUser {
-  avatar_url: string;
-  id: number;
-  login: string;
-  html_url: string;
-}
-
-interface Suggestion {
-  avatar: string;
-  id: number;
-  userName: string;
-  link: string;
-}
-
 const App = () => {
   const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<Suggestion[] | []>([]);
-  const [numberOfPendingRequests, setNumberOfPendingRequests] = useState(0);
-  const lastRequestWasFiredAt = useRef<number | null>(null);
-  const debouncedQuery = useDebounce(query, 500);
-
-  useEffect(() => {
-    if (debouncedQuery !== "") {
-      setNumberOfPendingRequests((previousValue) => previousValue + 1);
-
-      const searchFiredAt = Date.now();
-      lastRequestWasFiredAt.current = searchFiredAt;
-
-      getUsers(debouncedQuery).then((data) => {
-        setNumberOfPendingRequests((previousValue) => previousValue - 1);
-        if (lastRequestWasFiredAt.current === searchFiredAt) {
-          setSuggestions(
-            data.items.map((item: GitHubUser) => ({
-              avatar: item.avatar_url,
-              id: item.id,
-              userName: item.login,
-              link: item.html_url,
-            }))
-          );
-        }
-      });
-    } else {
-      setSuggestions([]);
-    }
-  }, [debouncedQuery]);
+  const { suggestions, isLoading, hasNoResults } = useGitHubUserSearch(query);
 
   return (
     <div className="search">
@@ -60,11 +17,15 @@ const App = () => {
           setQuery(event.target.value);
         }}
       />
-      {suggestions.length > 0 && numberOfPendingRequests === 0 && (
+      {suggestions.length > 0 && !isLoading && (
         <ul>
           {suggestions.map((suggestion) => (
             <li key={suggestion.id}>
-              <a href={suggestion.link}>
+              <a
+                href={suggestion.link}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
                 <img src={suggestion.avatar} alt={suggestion.userName} />
                 <span>{suggestion.userName}</span>
               </a>
@@ -72,14 +33,8 @@ const App = () => {
           ))}
         </ul>
       )}
-      {debouncedQuery !== "" &&
-        suggestions.length === 0 &&
-        numberOfPendingRequests === 0 && (
-          <div className="noResultsMessage">No results</div>
-        )}
-      {numberOfPendingRequests > 0 && (
-        <div className="loadingMessage">Loading...</div>
-      )}
+      {hasNoResults && <div className="noResultsMessage">No results</div>}
+      {isLoading && <div className="loadingMessage">Loading...</div>}
     </div>
   );
 };
