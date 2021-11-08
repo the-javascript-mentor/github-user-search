@@ -1,0 +1,50 @@
+.search {
+  width: 320px;
+  position: relative;
+}
+
+.search input {
+  display: block;
+  width: 100%;
+  padding: 4px;
+}
+
+.search ul {
+  position: absolute;
+  top: 100%;
+  list-style-type: none;
+  width: 100%;
+  border: 1px solid gray;
+}
+
+.search ul li {
+  border-bottom: 1px solid gray;
+}
+
+.search ul li:last-child {
+  border-bottom: 0;
+}
+
+.search ul li a {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  padding: 4px;
+  color: inherit;
+}
+
+.search ul li a:hover,
+.search ul li a:focus {
+  background-color: lightblue;
+}
+
+.search ul li a img {
+  width: 32px;
+  aspect-ratio: 1 / 1;
+}
+
+.search ul li a span {
+  flex-grow: 1;
+}

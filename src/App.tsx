@@ -26,6 +26,7 @@ const App = () => {
   useEffect(() => {
     if (debouncedQuery !== "") {
       getUsers(debouncedQuery).then((data) => {
+        // TODO: Fix race condition issue
         setSuggestions(
           data.items.map((item: GitHubUser) => ({
             avatar: item.avatar_url,
@@ -39,7 +40,7 @@ const App = () => {
   }, [debouncedQuery]);
 
   return (
-    <div>
+    <div className="search">
       <input
         placeholder="Search"
         type="search"
@@ -60,6 +61,7 @@ const App = () => {
           ))}
         </ul>
       )}
+      {/* TODO: Show message if there are no results */}
     </div>
   );
 };
