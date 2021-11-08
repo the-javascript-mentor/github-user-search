@@ -1,9 +1,11 @@
 import { useState } from "react";
+import useDebounce from "./useDebounce";
 
 import "./App.css";
 
 function App() {
   const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 500);
 
   return (
     <div>
