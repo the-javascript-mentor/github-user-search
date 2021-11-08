@@ -48,3 +48,9 @@
 .search ul li a span {
   flex-grow: 1;
 }
+
+.search .noResultsMessage {
+  position: absolute;
+  top: 100%;
+  width: 100%;
+}

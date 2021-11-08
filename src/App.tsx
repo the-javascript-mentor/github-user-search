@@ -36,6 +36,8 @@ const App = () => {
           }))
         );
       });
+    } else {
+      setSuggestions([]);
     }
   }, [debouncedQuery]);
 
@@ -61,7 +63,9 @@ const App = () => {
           ))}
         </ul>
       )}
-      {/* TODO: Show message if there are no results */}
+      {debouncedQuery !== "" && suggestions.length === 0 && (
+        <div className="noResultsMessage">No results</div>
+      )}
     </div>
   );
 };
